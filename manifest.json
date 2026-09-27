@@ -1,0 +1,16 @@
+{
+  "name": "AjonAiweb",
+  "short_name": "AjonAi",
+  "start_url": "/AjonAiweb/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "description": "My AI web app",
+  "icons": [
+    {
+      "src": "https://bwireinnocentjohn.github.io/AjonAiweb/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
