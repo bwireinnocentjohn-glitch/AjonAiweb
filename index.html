@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#000000"/>
+<title>Ajon AI</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:#000;color:#fff;
+    font-family:system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+  #app{position:fixed;left:0;top:0;right:0;max-width:520px;margin:0 auto;
+    display:flex;flex-direction:column;background:#000;overflow:hidden}
+  #hdr{flex:0 0 auto;display:flex;align-items:center;gap:10px;
+    background:#000;padding:12px 14px 10px;
+    padding-top:calc(env(safe-area-inset-top,0px) + 30px);
+    border-bottom:1px solid #1a1a1a}
+  .av{width:34px;height:34px;border-radius:50%;background:#25D366;color:#000;
+    font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center}
+  .t{flex:1;min-width:0}
+  .t b{font-size:14px;letter-spacing:.4px}
+  .t small{display:block;font-size:11px;color:#8a8a8a;margin-top:2px}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;
+    background:#25D366;margin-right:5px;vertical-align:middle}
+  #clr{flex:0 0 auto;border:1px solid #2a2a2a;background:#000;color:#fff;
+    font-size:11px;font-weight:700;border-radius:20px;padding:6px 11px}
+
+  #tabs{flex:0 0 auto;display:flex;background:#000;border-bottom:1px solid #1a1a1a}
+  #tabs button{flex:1;background:none;border:0;color:#888;padding:10px 4px;
+    font-size:12px;font-weight:700;cursor:pointer;
+    border-bottom:2px solid transparent;letter-spacing:.3px}
+  #tabs button.on{color:#fff;border-bottom-color:#25D366}
+  #tabs button:active{background:#111}
+
+  .view{display:none;flex-direction:column;flex:1 1 auto;min-height:0}
+  .view.on{display:flex}
+
+  #chat{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+    padding:10px 12px;display:flex;flex-direction:column;gap:6px;
+    -webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .m{max-width:86%;padding:7px 11px;border-radius:13px;font-size:14px;
+    line-height:1.45;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere;
+    animation:pop .12s ease-out}
+  @keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .m.u{align-self:flex-end;background:#25D366;color:#000;border-top-right-radius:3px}
+  .m.a{align-self:flex-start;background:#1a1a1a;color:#fff;border-top-left-radius:3px}
+  .m.s{align-self:center;background:#0d0d0d;color:#888;font-size:11px;
+    border-radius:10px;text-align:center;max-width:92%}
+  #bar{flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    background:#000;border-top:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a;
+    padding:8px 10px}
+  #bar input{flex:1;min-width:0;border:0;outline:0;background:#1a1a1a;color:#fff;
+    border-radius:22px;padding:12px 16px;font-size:16px}
+  #bar input::placeholder{color:#666}
+  #bar button{flex:0 0 auto;border:0;background:#25D366;color:#000;
+    border-radius:22px;padding:0 18px;height:44px;font-size:14px;font-weight:800}
+  #bar button:active{opacity:.8}
+  #pad{flex:0 0 26%;background:#000}
+  #pad small{display:block;text-align:center;color:#1a1a1a;
+    font-size:10px;margin-top:14px;letter-spacing:1px}
+
+  #view-learn{overflow-y:auto;padding:14px 12px calc(env(safe-area-inset-bottom,0px) + 14px)}
+  .card{background:#111;border:1px solid #1f1f1f;border-radius:12px;
+    padding:14px;margin-bottom:12px}
+  .card h3{margin:0 0 10px;font-size:14px;color:#25D366;letter-spacing:.4px}
+  .card p{margin:0 0 10px;font-size:12px;color:#888;line-height:1.45}
+  .card input,.card textarea{width:100%;background:#1a1a1a;border:1px solid #262626;
+    color:#fff;border-radius:8px;padding:10px 12px;font-size:14px;
+    font-family:inherit;outline:none;margin-bottom:8px;resize:vertical}
+  .card textarea{min-height:70px}
+  .btn{display:inline-block;border:0;background:#25D366;color:#000;font-weight:800;
+    font-size:13px;padding:10px 16px;border-radius:20px;cursor:pointer;margin-right:6px}
+  .btn.alt{background:#1a1a1a;color:#fff;border:1px solid #333}
+  .btn.warn{background:#c0392b;color:#fff}
+  .btn:active{opacity:.8}
+  .lock-note{color:#888;font-size:12px;margin-top:8px}
+  .lock-note.err{color:#e74c3c}
+  .item{background:#0d0d0d;border:1px solid #1f1f1f;border-radius:8px;
+    padding:10px;margin-bottom:8px;font-size:13px;line-height:1.4}
+  .item .q{color:#25D366;font-weight:700;margin-bottom:4px}
+  .item .a{color:#ddd;margin-bottom:8px;white-space:pre-wrap;word-wrap:break-word}
+  .item button{background:#2a1212;color:#ff6b6b;border:1px solid #3d1a1a;
+    border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer}
+  .empty{color:#555;font-size:12px;text-align:center;padding:14px}
+  .hidden{display:none!important}
+
+  #view-calc{padding:0;display:flex;flex-direction:column}
+  .calc-display{background:#0a0a0a;border-bottom:1px solid #1a1a1a;
+    padding:18px 16px;font-family:monospace;text-align:right;
+    min-height:96px;display:flex;flex-direction:column;justify-content:flex-end}
+  .calc-expr{color:#888;font-size:14px;min-height:18px;
+    overflow-x:auto;white-space:nowrap}
+  .calc-result{color:#fff;font-size:34px;font-weight:700;margin-top:6px;
+    overflow-x:auto;white-space:nowrap}
+  .calc-grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);
+    gap:1px;background:#1a1a1a;padding:1px;min-height:0}
+  .calc-grid button{background:#0d0d0d;color:#fff;border:0;
+    font-size:22px;font-weight:600;cursor:pointer;min-height:52px}
+  .calc-grid button:active{background:#1f1f1f}
+  .calc-grid button.op{color:#25D366}
+  .calc-grid button.eq{background:#25D366;color:#000}
+  .calc-grid button.eq:active{background:#1ea952}
+  .calc-grid button.clear{color:#e74c3c}
+  .calc-grid button.zero{grid-column:span 2}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <div class="av">A</div>
+    <div class="t">
+      <b>AJON AI</b>
+      <small><span class="dot"></span><span id="st">Ready</span></small>
+    </div>
+    <button id="clr" type="button">Clear</button>
+  </div>
+
+  <div id="tabs">
+    <button data-tab="chat" class="on" type="button">💬 Chat</button>
+    <button data-tab="learn" type="button">📚 Learn</button>
+    <button data-tab="calc" type="button">🔢 Calc</button>
+  </div>
+
+  <div id="view-chat" class="view on">
+    <div id="chat"></div>
+    <form id="bar" autocomplete="off" onsubmit="return false;">
+      <input id="q" type="text" enterkeyhint="send" placeholder="Say something…"
+             autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <button type="submit">Send</button>
+    </form>
+    <div id="pad"><small>AJON AI · OFFLINE</small></div>
+  </div>
+
+  <div id="view-learn" class="view">
+    <div id="learnLocked">
+      <div class="card">
+        <h3>🔒 Learn tab locked</h3>
+        <p>Enter the password to teach Ajon AI. Only the maker knows it.</p>
+        <input id="pwd" type="password" placeholder="Password" autocomplete="off"/>
+        <button class="btn" id="unlockBtn" type="button">Unlock</button>
+        <div class="lock-note" id="lockMsg"></div>
+      </div>
+    </div>
+
+    <div id="learnUnlocked" class="hidden">
+      <div class="card">
+        <h3>📚 Teach Ajon AI</h3>
+        <p>Type a question and the answer. Ajon will remember it forever on this phone.</p>
+        <input id="newQ" type="text" placeholder="Question (e.g. what is your name)"/>
+        <textarea id="newA" placeholder="Answer (e.g. My name is Ajon AI)"></textarea>
+        <button class="btn" id="saveBtn" type="button">Save</button>
+        <button class="btn alt" id="lockBtn" type="button">🔒 Lock</button>
+        <div class="lock-note" id="saveMsg"></div>
+      </div>
+
+      <div class="card">
+        <h3>📋 Learned items (<span id="learnCount">0</span>)</h3>
+        <div id="learnedList"></div>
+        <div style="margin-top:10px">
+          <button class="btn alt" id="exportBtn" type="button">📤 Export all</button>
+          <button class="btn alt" id="importBtn" type="button">📥 Import</button>
+        </div>
+        <div class="lock-note" id="ioMsg"></div>
+        <textarea id="ioBox" placeholder="Exported JSON appears here. Paste JSON here to import, then tap Import." style="margin-top:10px;min-height:90px;display:none"></textarea>
+        <button class="btn alt hidden" id="doImportBtn" type="button" style="margin-top:6px">✅ Confirm import</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-calc" class="view">
+    <div class="calc-display">
+      <div class="calc-expr" id="calcExpr">0</div>
+      <div class="calc-result" id="calcResult"></div>
+    </div>
+    <div class="calc-grid" id="calcGrid">
+      <button class="clear" data-k="C" type="button">C</button>
+      <button class="op" data-k="←" type="button">←</button>
+      <button class="op" data-k="%" type="button">%</button>
+      <button class="op" data-k="/" type="button">÷</button>
+      <button data-k="7" type="button">7</button>
+      <button data-k="8" type="button">8</button>
+      <button data-k="9" type="button">9</button>
+      <button class="op" data-k="*" type="button">×</button>
+      <button data-k="4" type="button">4</button>
+      <button data-k="5" type="button">5</button>
+      <button data-k="6" type="button">6</button>
+      <button class="op" data-k="-" type="button">−</button>
+      <button data-k="1" type="button">1</button>
+      <button data-k="2" type="button">2</button>
+      <button data-k="3" type="button">3</button>
+      <button class="op" data-k="+" type="button">+</button>
+      <button class="zero" data-k="0" type="button">0</button>
+      <button data-k="." type="button">.</button>
+      <button class="eq" data-k="=" type="button">=</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var $=function(id){return document.getElementById(id)};
+
+/* ============ KEYBOARD FIX ============ */
+function fit(){
+  var vv=window.visualViewport,a=$('app');
+  if(!a)return;
+  a.style.height=(vv?vv.height:window.innerHeight)+'px';
+  a.style.top=(vv?vv.offsetTop:0)+'px';
+}
+if(window.visualViewport){
+  visualViewport.addEventListener('resize',fit);
+  visualViewport.addEventListener('scroll',fit);
+}
+window.addEventListener('resize',fit);
+window.addEventListener('orientationchange',function(){setTimeout(fit,120)});
+
+function msg(role,text){
+  var c=$('chat'),d=document.createElement('div');
+  d.className='m '+role;d.textContent=text;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function esc(s){
+  return String(s||'').replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* ============ NORMALIZE ============ */
+var CONTRACTIONS=[
+  [/\bwhat's\b/g,'what is'],[/\bit's\b/g,'it is'],[/\bi'm\b/g,'i am'],
+  [/\byou're\b/g,'you are'],[/\bdon't\b/g,'do not'],[/\bcan't\b/g,'can not'],
+  [/\bwon't\b/g,'will not'],[/\bdidn't\b/g,'did not'],[/\bdoesn't\b/g,'does not'],
+  [/\bisn't\b/g,'is not'],[/\baren't\b/g,'are not'],[/\bwe're\b/g,'we are'],
+  [/\bthey're\b/g,'they are'],[/\bthat's\b/g,'that is'],[/\bthere's\b/g,'there is'],
+  [/\bhasn't\b/g,'has not'],[/\bhaven't\b/g,'have not'],[/\bwasn't\b/g,'was not'],
+  [/\bweren't\b/g,'were not'],[/\bwouldn't\b/g,'would not'],[/\bshouldn't\b/g,'should not'],
+  [/\bcouldn't\b/g,'could not']
+];
+function norm(s){
+  var x=String(s||'').toLowerCase();
+  for(var i=0;i<CONTRACTIONS.length;i++) x=x.replace(CONTRACTIONS[i][0],CONTRACTIONS[i][1]);
+  return x.replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+var STOP=new Set(['the','a','an','of','in','on','to','and','or','for','with',
+  'is','are','was','were','be','by','at','it','this','that','from','as',
+  'do','does','did','my','me','i','you','your','we','they','he','she']);
+function sigWords(s){
+  return norm(s).split(' ').filter(function(w){ return w.length>1 && !STOP.has(w); });
+}
+
+/* ============ DICTIONARY ============ */
+var DICT_RAW =
+"happy~feeling joy and pleasure|sad~feeling sorrow|angry~feeling strong displeasure|afraid~feeling fear|scared~frightened|brave~ready to face danger|proud~pleased about something you did|shy~nervous around other people|jealous~envious of what someone has|lonely~sad because you are alone|excited~very happy and eager|bored~tired because nothing interests you|surprised~shocked by something unexpected|confused~unable to understand|calm~peaceful and quiet|worried~feeling anxious about something|nervous~easily worried|grateful~thankful for what you have|hopeful~expecting something good|curious~eager to learn|embarrassed~feeling shy and awkward|disappointed~sad because something was not as good as hoped|content~quietly happy|anxious~worried about the future|cheerful~full of good spirits|grumpy~in a bad mood|loving~showing deep affection|kind~caring about other people|cruel~causing pain to others|polite~showing good manners|rude~showing bad manners|honest~telling the truth|dishonest~not telling the truth|loyal~firmly supporting someone|selfish~thinking only of yourself|generous~willing to give to others|patient~able to wait calmly|impatient~unable to wait calmly|stubborn~refusing to change your mind|humble~not proud|"+
+"run~move quickly on foot|walk~move at a slow pace|jump~push yourself off the ground|eat~put food in your mouth and swallow|drink~take liquid into your mouth|sleep~rest with your eyes closed|wake~stop sleeping|read~look at and understand words|write~mark letters or words|speak~say words|talk~say things to someone|listen~pay attention to sound|hear~receive sound with your ears|see~notice with your eyes|look~direct your eyes at something|watch~look at for a time|learn~gain knowledge or skill|teach~give knowledge to someone|study~learn by reading and thinking|help~assist someone|play~take part in games|work~do a job|rest~stop working for a time|think~use your mind|know~be aware of something|understand~grasp the meaning|remember~bring back to mind|forget~fail to remember|like~be fond of|love~care deeply for|want~wish for something|need~require something|give~hand something over|take~reach and hold|get~receive or obtain|buy~get by paying money|sell~give for money|pay~give money for something|build~make by putting parts together|break~separate into pieces|open~move so it is not closed|close~shut|start~begin|stop~end an action|finish~complete|laugh~make sounds of joy|cry~shed tears|smile~show happiness with the mouth|sing~make music with your voice|dance~move your body to music|cook~prepare food with heat|clean~make free of dirt|wash~clean with water|draw~make a picture with lines|paint~colour with paint|count~find the total number|add~put together|subtract~take away|multiply~add a number to itself many times|divide~share into equal parts|catch~grab something moving|throw~send through the air|push~press away from you|pull~move towards you|carry~hold and move with|lift~raise up|drop~let fall|find~discover by searching|lose~no longer have|win~be first or best|try~make an effort|fail~not succeed|succeed~achieve what you wanted|wait~stay until something happens|hurry~move quickly|follow~go after|lead~go in front|ask~say a question|answer~reply to a question|call~shout or phone|shout~speak very loudly|whisper~speak very softly|share~give part to others|borrow~take and return later|lend~give for a time|keep~not give away|send~cause to go somewhere|bring~carry here|drive~control a vehicle|ride~sit on and control|fly~move through the air|swim~move through water|climb~go up|fall~drop down|stand~be on your feet|sit~rest on your bottom|meet~come together with|visit~go to see someone|leave~go away|arrive~reach a place|return~come back|choose~pick one|decide~make a choice|agree~have the same opinion|refuse~say no|accept~say yes to|promise~say you will do something|invite~ask someone to come|thank~say you are grateful|apologize~say sorry|forgive~stop being angry at|respect~show honour to|pray~speak to God|believe~accept as true|hope~wish for something good|wish~want something to happen|"+
+"water~a clear liquid we drink|food~what people eat|house~a building where people live|home~the place where you live|room~a space inside a building|door~an entrance you open and close|window~an opening with glass for light|wall~the side of a room or building|floor~the surface you walk on|roof~the top cover of a building|stairs~steps going up or down|table~furniture with a flat top and legs|chair~a seat with a back|bed~furniture you sleep on|book~pages with writing bound together|pen~a tool for writing with ink|pencil~a tool for writing that can be rubbed out|paper~thin sheets used for writing|bag~a container with a handle|box~a container with flat sides|bottle~a container with a narrow neck|cup~a small container for drinking|plate~a flat dish for food|spoon~a tool for eating soft food|fork~a tool with prongs for eating|knife~a tool with a blade for cutting|key~a metal tool to open a lock|clock~a device that shows the time|watch~a small clock worn on the wrist|mirror~glass that shows your reflection|light~brightness that lets us see|money~coins and notes used to buy|coin~a round piece of money|cash~money in coins and notes|price~the amount of money something costs|shop~a place where goods are sold|market~a place where people buy and sell|road~a wide path for vehicles|street~a road in a town|path~a narrow way for walking|bridge~a structure built over a river|gate~a door in a fence or wall|fence~a barrier around land|garden~a piece of land for growing plants|farm~land used for crops or animals|field~open land for crops or games|tree~a tall plant with a trunk|leaf~the flat green part of a plant|flower~the coloured part of a plant|grass~short green plants covering ground|fruit~the sweet part of a plant with seeds|seed~the part of a plant that grows into a new plant|root~the part of a plant under the ground|stone~a small piece of rock|rock~hard material in the ground|sand~tiny grains of rock|dust~fine dry dirt|mud~wet soft earth|mountain~a very high land feature|hill~a small mountain|river~a large stream of water|lake~a large area of water|sea~a large body of salt water|ocean~a very large sea|beach~sandy land next to the sea|island~land surrounded by water|forest~a large area of trees|desert~a dry area with little rain|valley~low land between hills|cloud~white or grey mass in the sky|sky~the space above the earth|sun~the star that gives light and heat|moon~the natural satellite of the earth|star~a bright point in the night sky|rain~water falling from clouds|wind~air moving outside|storm~strong wind with rain|thunder~loud sound during a storm|lightning~bright flash during a storm|snow~frozen white flakes from the sky|ice~frozen water|fire~hot bright flames|smoke~grey cloud from fire|shadow~dark area when light is blocked|noise~unpleasant sound|voice~the sound of speaking|word~a unit of language|letter~a written symbol for a sound|number~a symbol for counting|name~what someone or something is called|story~a tale of events|song~music with words|game~an activity played for fun|sport~a physical game with rules|team~a group playing together|race~a competition of speed|prize~a reward for winning|gift~something given freely|news~information about recent events|job~the work a person does|teacher~a person who teaches|doctor~a person who treats sick people|nurse~a person who cares for sick people|farmer~a person who grows crops|driver~a person who drives|police~people who keep law and order|soldier~a member of an army|leader~a person who leads others|king~a male ruler of a country|queen~a female ruler of a country|president~the head of a country|baby~a very young child|child~a young person|man~an adult male|woman~an adult female|boy~a young male|girl~a young female|friend~a person you like and trust|enemy~a person who hates you|stranger~a person you do not know|neighbour~a person living near you|guest~a visitor you welcome|visitor~someone who comes to see you|"+
+"dog~a common pet that barks|cat~a small furry pet that meows|cow~a farm animal that gives milk|goat~a farm animal with horns|sheep~a farm animal with wool|pig~a farm animal with a snout|chicken~a farm bird that lays eggs|duck~a water bird with a flat beak|turkey~a large farm bird|donkey~an animal like a small horse|horse~a large animal used for riding|camel~a desert animal with a hump|lion~a large wild cat with a mane|elephant~a huge animal with a trunk|tiger~a large striped wild cat|leopard~a spotted wild cat|cheetah~a fast spotted wild cat|monkey~a climbing animal with a tail|gorilla~a large ape|snake~a long animal with no legs|lizard~a small reptile with legs|crocodile~a large reptile in rivers|turtle~a reptile with a hard shell|fish~an animal that lives in water|shark~a large fish with sharp teeth|whale~a very large sea animal|dolphin~a smart sea animal|bird~an animal with feathers and wings|eagle~a large bird of prey|parrot~a colourful bird that can talk|owl~a bird that hunts at night|insect~a small animal with six legs|mosquito~a small flying insect that bites|bee~a flying insect that makes honey|ant~a small insect that lives in groups|butterfly~an insect with large colourful wings|spider~a small animal with eight legs|frog~a small jumping animal near water|rat~a small animal like a mouse|rabbit~a small animal with long ears|deer~a forest animal with antlers|giraffe~a tall animal with a long neck|zebra~an African animal with stripes|hippopotamus~a large African river animal|rhinoceros~a large animal with a horn|buffalo~a large wild cow|antelope~a fast African animal|warthog~a wild pig of Africa|hyena~an African animal like a dog|cockroach~a brown insect in houses|fly~a small flying insect|termite~an insect that eats wood|"+
+"head~the top part of the body|face~the front of the head|hair~the strands growing on the head|eye~the organ we see with|ear~the organ we hear with|nose~the organ we smell with|mouth~the opening we eat and speak with|lip~the soft edge of the mouth|tooth~a hard white part in the mouth|tongue~the soft part used for taste and speech|neck~the part joining head and body|shoulder~where the arm joins the body|arm~the limb from shoulder to hand|elbow~the joint in the middle of the arm|hand~the part at the end of the arm|finger~one of five parts on the hand|thumb~the short thick first finger|nail~the hard cover on a fingertip|chest~the front of the upper body|back~the rear part of the body|stomach~the organ that digests food|waist~the middle of the body|hip~the side of the body below the waist|leg~the limb from hip to foot|knee~the joint in the middle of the leg|foot~the part at the end of the leg|toe~one of five parts on the foot|skin~the outer covering of the body|bone~a hard part of the skeleton|muscle~tissue that moves the body|blood~the red liquid in the body|heart~the organ that pumps blood|brain~the organ that controls the body|lung~the organ used for breathing|kidney~the organ that filters blood|liver~the organ that cleans the blood|"+
+"air~the mixture of gases we breathe|oxygen~the gas we need to live|soil~top layer of earth where plants grow|plant~a living thing that grows in soil|animal~a living thing that can move|reptile~a cold blooded animal with scales|mammal~a warm blooded animal with hair|weather~the state of the sky and air|climate~average weather over many years|season~a part of the year with its own weather|rainbow~coloured arc after rain|earthquake~shaking of the ground|flood~water covering dry land|drought~a long period without rain|volcano~a mountain that erupts hot rock|planet~a large body that goes around a star|"+
+"mother~a female parent|father~a male parent|parent~a mother or father|son~a male child|daughter~a female child|brother~a boy with the same parents|sister~a girl with the same parents|grandmother~the mother of your parent|grandfather~the father of your parent|grandparent~a parent of your parent|uncle~the brother of your parent|aunt~the sister of your parent|cousin~the child of your uncle or aunt|nephew~the son of your brother or sister|niece~the daughter of your brother or sister|husband~a married man|wife~a married woman|family~parents and children|"+
+"rice~small grains cooked as food|bread~food made from flour and baked|cake~a sweet baked food|milk~white liquid from cows|meat~the flesh of animals eaten as food|beef~meat from cattle|egg~a round food laid by birds|vegetable~a plant or part of one eaten as food|banana~a long yellow fruit|mango~a sweet tropical fruit|orange~a round citrus fruit|lemon~a sour yellow citrus fruit|apple~a round fruit with red or green skin|pineapple~a large tropical fruit|pawpaw~a sweet orange tropical fruit|watermelon~a large fruit with pink flesh|groundnut~a small nut grown in the soil|maize~a tall plant with yellow grains|bean~a seed eaten as food|pea~a small round green seed|potato~a round vegetable that grows in soil|tomato~a soft red fruit used in cooking|cabbage~a leafy green vegetable|onion~a round vegetable with a strong smell|carrot~a long orange vegetable|sugar~a sweet white substance|salt~a white substance used to flavour food|pepper~a spice with a hot taste|oil~a liquid fat used for cooking|honey~a sweet food made by bees|butter~a soft yellow food made from milk|cheese~a food made from milk|yoghurt~a food made from milk and bacteria|tea~a hot drink made from leaves|coffee~a hot drink made from beans|juice~a drink made from fruit|soup~a liquid food made by boiling|stew~meat and vegetables cooked slowly|"+
+"student~a person who is learning|pupil~a child at school|class~a group of pupils learning|lesson~a period of teaching|homework~school work done at home|exam~a test of knowledge|test~a short exam|result~the mark you get in an exam|grade~a level of quality or mark|desk~a table for writing or working|chalk~a white stick for writing on a board|board~a flat surface for writing on|library~a place with many books|subject~a branch of knowledge taught|english~the language we are using|math~the study of numbers and shapes|science~the study of the natural world|history~the study of the past|geography~the study of the earth|"+
+"village~a small settlement in the countryside|town~a settlement larger than a village|city~a very large town|country~a nation with its own government|nation~a country and its people|continent~a very large area of land|hospital~a place where sick people are treated|clinic~a small hospital|church~a building for Christian worship|mosque~a building for Muslim worship|temple~a building for worship|store~a shop or place where things are kept|bank~a place that keeps money|school~a place where children learn|university~a place of higher learning|airport~a place where planes land|station~a place where trains stop|harbour~a place where ships dock|"+
+"second~a very short unit of time|minute~60 seconds|hour~60 minutes|day~24 hours|week~seven days|month~about 30 days|year~12 months|century~100 years|morning~the early part of the day|afternoon~the time after noon|evening~the time near the end of the day|noon~12 o'clock in the day|midnight~12 o'clock at night|today~this present day|tomorrow~the day after today|yesterday~the day before today|now~at the present moment|later~at a future time|soon~in a short time|early~before the expected time|late~after the expected time|always~every time|never~not at any time|sometimes~on some occasions|often~many times|rarely~not very often|daily~every day|weekly~every week|monthly~every month|yearly~every year|"+
+"red~the colour of blood|blue~the colour of the sky|green~the colour of grass|yellow~the colour of the sun|black~the darkest colour|white~the lightest colour|purple~a colour between red and blue|brown~the colour of soil|pink~a light red colour|grey~a colour between black and white|orange~a colour between red and yellow|"+
+"circle~a round shape|square~a shape with four equal sides|triangle~a shape with three sides|rectangle~a shape with four sides and right angles|oval~a shape like an egg|"+
+"big~large in size|small~little in size|tall~high in height|short~not tall or not long|long~extending far|wide~large from side to side|narrow~not wide|thick~wide between two sides|thin~narrow between two sides|heavy~weighing a lot|light~not heavy|fast~moving quickly|slow~moving without speed|hot~having high temperature|cold~having low temperature|warm~fairly hot|cool~fairly cold|new~recently made|old~having existed long|young~not old|good~of high quality|bad~of poor quality|clean~free of dirt|dirty~covered with dirt|rich~having a lot of money|poor~having little money|strong~having great power|weak~not strong|beautiful~pleasing to look at|pretty~pleasing to look at|ugly~not pleasing to look at|easy~not difficult|hard~difficult or solid|soft~not hard|smooth~flat and even|rough~not smooth|sweet~tasting like sugar|bitter~having a sharp taste|sour~tasting like lemon|salty~tasting of salt|full~holding as much as possible|empty~holding nothing|loud~making much sound|quiet~making little sound|bright~giving much light|dark~having little light|expensive~costing a lot of money|cheap~costing little money|correct~right|wrong~not correct|true~in agreement with facts|false~not true|same~not different|different~not the same|"+
+"life~the state of being alive|death~the end of life|peace~freedom from war and trouble|war~fighting between countries|truth~what is real and correct|lie~something said that is not true|dream~images in the mind during sleep|hope~a wish for something good|fear~a feeling of danger|joy~a feeling of great happiness|pain~a feeling of hurt|health~the state of being well|wealth~a large amount of money|wisdom~good judgement from experience|knowledge~facts and skills learned|power~the ability to control|freedom~the state of being free|respect~showing honour to someone|courage~the ability to face fear|faith~strong belief|trust~believing someone is honest|doubt~not being sure|reason~a cause or explanation|purpose~the aim of something|idea~a thought or plan|thought~what you think|mind~the part of you that thinks|soul~the spirit of a person|spirit~the non physical part of a person|"+
+"internet~a global network of computers|website~a set of pages on the internet|email~a message sent by computer|password~a secret word for access|screen~the flat part of a device you look at|keyboard~a set of keys for typing|battery~a device that stores electric power|camera~a device for taking photos|radio~a device that receives broadcast sound|television~a device that shows pictures and sound|phone~a device for talking to people far away|computer~a machine that processes information|video~a recording of moving images|photo~a picture made with a camera|message~a piece of written communication";
+
+var DICT=new Map();
+(function(){
+  var parts=DICT_RAW.split('|');
+  for(var i=0;i<parts.length;i++){
+    var k=parts[i].indexOf('~');
+    if(k<1) continue;
+    var w=parts[i].slice(0,k).trim();
+    var d=parts[i].slice(k+1).trim();
+    if(w&&d&&!DICT.has(w)) DICT.set(w,d);
+  }
+})();
+
+/* ============ SYNONYMS ============ */
+var SYN_RAW=
+"big:large,huge,enormous,giant|small:little,tiny,mini|happy:glad,joyful,cheerful|sad:unhappy,sorrowful,down|angry:mad,furious|fast:quick,swift,rapid|slow:sluggish,gradual|smart:clever,intelligent,bright|strong:powerful,mighty|weak:frail,feeble|beautiful:pretty,lovely,gorgeous|ugly:unattractive|rich:wealthy,affluent|poor:needy,penniless|cold:chilly,freezing|hot:warm,boiling|loud:noisy,deafening|quiet:silent,still|easy:simple,effortless|hard:difficult,tough|clean:tidy,spotless|dirty:filthy,messy|old:ancient,aged|new:fresh,recent|good:great,fine,nice|bad:poor,awful|kind:caring,gentle|mean:cruel,unkind|brave:courageous,bold|afraid:scared,frightened|funny:amusing,comical|calm:peaceful,serene|tired:weary,exhausted|hungry:starving|full:packed,stuffed|empty:vacant,hollow|correct:right,accurate|wrong:incorrect,mistaken|begin:start,commence|end:finish,conclude|show:display,reveal|hide:conceal,cover|make:create,build|break:destroy,smash|give:donate,offer|take:grab,seize|speak:talk,chat|walk:stroll,stride|run:sprint,dash|look:see,glance|think:ponder,reflect|know:understand,realize|help:assist,aid|love:adore,cherish|hate:despise,detest|want:wish,desire|need:require,demand|buy:purchase|sell:vend|ask:inquire,question|answer:reply,respond|choose:select,pick|find:discover,locate|lose:misplace|win:triumph,succeed|friend:buddy,pal|enemy:foe,opponent|house:home,residence|road:street,path|car:vehicle,automobile|money:cash,currency|job:work,occupation|child:kid,youngster|woman:lady|man:gentleman|food:meal,nourishment";
+
+var SYN=new Map();
+(function(){
+  var parts=SYN_RAW.split('|');
+  for(var i=0;i<parts.length;i++){
+    var k=parts[i].indexOf(':');
+    if(k<1) continue;
+    var w=parts[i].slice(0,k).trim();
+    var list=parts[i].slice(k+1).split(',').map(function(x){return x.trim()}).filter(Boolean);
+    if(w&&list.length) SYN.set(w,list);
+  }
+})();
+var SYN_REV=new Map();
+SYN.forEach(function(list,word){
+  for(var i=0;i<list.length;i++){
+    if(!SYN_REV.has(list[i])) SYN_REV.set(list[i], word);
+  }
+});
+
+/* ============ FACTS ============ */
+var FACTS_RAW =
+"capital of uganda~Kampala is the capital city of Uganda|capital of kenya~Nairobi is the capital city of Kenya|capital of tanzania~Dodoma is the capital city of Tanzania|capital of rwanda~Kigali is the capital city of Rwanda|capital of burundi~Gitega is the capital city of Burundi|capital of south sudan~Juba is the capital city of South Sudan|capital of nigeria~Abuja is the capital city of Nigeria|capital of south africa~Pretoria is the capital city of South Africa|capital of egypt~Cairo is the capital city of Egypt|capital of ethiopia~Addis Ababa is the capital city of Ethiopia|capital of ghana~Accra is the capital city of Ghana|capital of france~Paris is the capital city of France|capital of uk~London is the capital of the United Kingdom|capital of england~London is the capital city of England|capital of usa~Washington DC is the capital of the United States|capital of america~Washington DC is the capital of the United States|capital of china~Beijing is the capital city of China|capital of japan~Tokyo is the capital city of Japan|capital of india~New Delhi is the capital city of India|capital of brazil~Brasilia is the capital city of Brazil|capital of canada~Ottawa is the capital city of Canada|capital of australia~Canberra is the capital city of Australia|capital of germany~Berlin is the capital city of Germany|capital of italy~Rome is the capital city of Italy|capital of spain~Madrid is the capital city of Spain|capital of russia~Moscow is the capital city of Russia|capital of saudi arabia~Riyadh is the capital city of Saudi Arabia|capital of uae~Abu Dhabi is the capital city of the United Arab Emirates|capital of somalia~Mogadishu is the capital city of Somalia|capital of drc~Kinshasa is the capital of the Democratic Republic of Congo|"+
+"president of uganda~Yoweri Kaguta Museveni is the President of Uganda|first president of uganda~Edward Mutesa II was the first President of Uganda|first prime minister of uganda~Milton Obote was the first Prime Minister of Uganda|uganda independence~Uganda got independence on 9th October 1962 from Britain|uganda currency~The Uganda shilling (UGX) is the currency of Uganda|uganda population~Uganda has about 47 million people|uganda languages~English and Swahili are the official languages of Uganda|uganda motto~Uganda's motto is For God and My Country|uganda flag~The Uganda flag has black, yellow and red stripes with a crested crane|uganda national bird~The grey crowned crane is Uganda's national bird|uganda highest mountain~Mount Rwenzori is the highest mountain in Uganda|uganda biggest lake~Lake Victoria is the biggest lake in Uganda|uganda longest river~The River Nile is the longest river in Uganda|uganda capital~Kampala is the capital city of Uganda|"+
+"largest planet~Jupiter is the largest planet in our solar system|smallest planet~Mercury is the smallest planet in our solar system|closest planet to the sun~Mercury is the closest planet to the sun|red planet~Mars is called the red planet|number of planets~There are 8 planets in our solar system|our planet~We live on planet Earth|star of our solar system~The Sun is the star of our solar system|largest ocean~The Pacific Ocean is the largest ocean on Earth|largest desert~The Sahara is the largest hot desert in the world|highest mountain in the world~Mount Everest is the highest mountain in the world|longest river in the world~The Nile is the longest river in the world|largest continent~Asia is the largest continent|smallest continent~Australia is the smallest continent|number of continents~There are 7 continents|number of countries~There are about 195 countries in the world|boiling point of water~Water boils at 100°C|freezing point of water~Water freezes at 0°C|chemical formula of water~Water is H2O — two hydrogen atoms and one oxygen atom|chemical formula of carbon dioxide~Carbon dioxide is CO2|gas we breathe in~We breathe in oxygen|gas we breathe out~We breathe out carbon dioxide|how many bones~An adult human has 206 bones|how many teeth~An adult has 32 teeth; a child has 20 milk teeth|how many chambers in the heart~The human heart has 4 chambers|how many legs does a spider have~A spider has 8 legs|how many legs does an insect have~An insect has 6 legs|how many days in a year~There are 365 days in a year (366 in a leap year)|how many weeks in a year~There are about 52 weeks in a year|how many months in a year~There are 12 months in a year|"+
+"value of pi~Pi is about 3.14159|area of a circle~Area of a circle is pi × radius × radius|area of a triangle~Area of a triangle is ½ × base × height|area of a rectangle~Area of a rectangle is length × width|perimeter of a square~Perimeter of a square is 4 × side|pythagoras theorem~In a right triangle a² + b² = c²|what is a prime number~A prime number can only be divided by 1 and itself, e.g. 2, 3, 5, 7, 11|what is an even number~A number divisible by 2, e.g. 2, 4, 6, 8|what is an odd number~A number that leaves 1 when divided by 2, e.g. 1, 3, 5, 7|what is a percentage~A percentage is a number out of 100, e.g. 50% = 1/2|what is average~Average = sum of values ÷ number of values|what is a fraction~A fraction shows part of a whole, e.g. 1/2 means one out of two|what is multiplication~Multiplication is repeated addition, e.g. 3 × 4 = 12|what is division~Division shares a number into equal parts, e.g. 12 ÷ 3 = 4";
+
+var FACTS=[];
+(function(){
+  var parts=FACTS_RAW.split('|');
+  for(var i=0;i<parts.length;i++){
+    var k=parts[i].indexOf('~');
+    if(k<1) continue;
+    FACTS.push({q:parts[i].slice(0,k).trim(), a:parts[i].slice(k+1).trim()});
+  }
+})();
+
+/* ============ WISDOM PACK ============ */
+var PROVERBS=[
+  {p:"A journey of a thousand miles begins with a single step",m:"Big goals start with small actions."},
+  {p:"Where there is a will, there is a way",m:"If you really want something, you will find a way."},
+  {p:"Do not judge a book by its cover",m:"Do not decide what someone is like from how they look."},
+  {p:"A friend in need is a friend indeed",m:"A true friend helps you when you are in trouble."},
+  {p:"The early bird catches the worm",m:"Starting early gives you the best chance."},
+  {p:"Actions speak louder than words",m:"What you do matters more than what you say."},
+  {p:"Honesty is the best policy",m:"Always tell the truth; it is the best way to live."},
+  {p:"Practice makes perfect",m:"The more you do something, the better you become."},
+  {p:"If you want to go fast, go alone; if you want to go far, go together",m:"Working with others takes you further."},
+  {p:"Smooth seas do not make a skillful sailor",m:"Difficult times make you stronger and wiser."},
+  {p:"A single bracelet does not jingle",m:"You cannot do big things alone; you need others."},
+  {p:"Rain does not fall on one roof alone",m:"Problems affect everyone, not just one person."},
+  {p:"A tree is known by its fruit",m:"You are known by what you do, not what you say."},
+  {p:"Knowledge is like a garden; if not cultivated, it cannot be harvested",m:"You must keep learning to keep growing."},
+  {p:"The best time to plant a tree was 20 years ago; the second best is now",m:"It is never too late to start something good."},
+  {p:"A river is filled by many small streams",m:"Many small efforts make great achievements."},
+  {p:"He who asks is a fool for five minutes; he who does not ask is a fool forever",m:"It is smart to ask questions."},
+  {p:"Patience is a tree whose root is bitter but its fruit is sweet",m:"Waiting is hard, but the reward is worth it."},
+  {p:"Birds of the same feathers flock together",m:"People with similar interests stay together."},
+  {p:"Strike while the iron is hot",m:"Act at the right moment."},
+  {p:"A stitch in time saves nine",m:"Fix a small problem now before it becomes big."},
+  {p:"Look before you leap",m:"Think carefully before you act."},
+  {p:"Too many cooks spoil the broth",m:"When too many people try the same job, it gets ruined."},
+  {p:"Necessity is the mother of invention",m:"When you need something badly, you find a way."},
+  {p:"The pen is mightier than the sword",m:"Words and ideas are more powerful than violence."},
+  {p:"Every cloud has a silver lining",m:"Even in bad situations, there is something good."},
+  {p:"The fool speaks, the wise man listens",m:"Wise people listen more than they talk."},
+  {p:"When there is no enemy within, the enemy outside cannot harm you",m:"Inner peace protects you from outside harm."}
+];
+
+var STORIES=[
+  {t:"the lion and the mouse",s:"A lion caught a small mouse. The mouse begged to be let go and promised to help one day. The lion laughed but let him go. Later, the lion was caught in a hunter's net. The little mouse gnawed the ropes and set him free.",m:"Even small friends can be great helpers."},
+  {t:"the hare and the tortoise",s:"A hare laughed at a slow tortoise. They raced. The hare ran fast, then stopped to rest and fell asleep. The tortoise kept walking slowly and reached the finish line first.",m:"Slow and steady wins the race."},
+  {t:"the boy who cried wolf",s:"A boy kept shouting Wolf! to trick the villagers. Each time they ran to help and found no wolf. One day a real wolf came. He shouted for help, but nobody believed him.",m:"If you lie often, no one will believe you when you tell the truth."},
+  {t:"the ant and the grasshopper",s:"All summer the ant stored food while the grasshopper sang and played. When winter came, the grasshopper had nothing to eat while the ant was ready.",m:"Prepare today for the needs of tomorrow."},
+  {t:"the fox and the grapes",s:"A hungry fox tried and tried to reach grapes high on a vine. When he could not reach them, he walked away saying, They are probably sour anyway.",m:"It is easy to hate what you cannot have."},
+  {t:"the crow and the pitcher",s:"A thirsty crow found a pitcher with a little water at the bottom. He dropped pebbles in one by one until the water rose. Then he drank.",m:"Little by little, patience solves big problems."},
+  {t:"the two goats on the bridge",s:"Two goats met on a narrow bridge from opposite sides. Neither would back down. They pushed each other and both fell into the river.",m:"Stubbornness brings trouble; yielding brings peace."},
+  {t:"the milkmaid and her pot",s:"A girl carrying a pot of milk to market dreamed of selling it, buying eggs, hatching chickens, and getting rich. She was so excited she tossed her head, and the milk spilled.",m:"Do not count your chickens before they hatch."},
+  {t:"the proud oak and the humble reed",s:"A big oak tree mocked a small reed for bending in the wind. That night a strong storm came. The oak stood firm and was uprooted. The reed bent and survived.",m:"Humility often survives what pride cannot."},
+  {t:"the golden goose",s:"A farmer had a goose that laid one golden egg each day. He became greedy and wanted all the gold at once. He killed the goose, but found nothing inside.",m:"Greed destroys what patience would keep."},
+  {t:"the dog and his reflection",s:"A dog carrying a piece of meat saw his reflection in a river and thought it was another dog with a bigger piece. He barked, and dropped his own meat into the water.",m:"Do not lose what you have by chasing what you do not need."},
+  {t:"the thirsty crow",s:"A crow dying of thirst found a tall jar with a little water. He could not reach it. He dropped small stones into the jar until the water rose to the top, then drank.",m:"Clever thinking solves hard problems."}
+];
+
+var LUGANDA=[
+  ["hello","ki kati"],["welcome","tukusanyukidde"],["thank you","webale"],
+  ["good morning","wasuze otya"],["good afternoon","osiibye otya"],
+  ["good evening","ogenda otya"],["good night","sula bulungi"],
+  ["yes","yee"],["no","nedda"],["water","amazzi"],["food","emmere"],
+  ["child","omwana"],["mother","maama"],["father","taata"],
+  ["friend","munange"],["love","kwagala"],["house","ennyumba"],
+  ["school","essomero"],["teacher","omusomesa"],["book","kitabo"],
+  ["money","ssente"],["market","akatale"],["road","oluguudo"],
+  ["sun","enjuba"],["moon","omwezi"],["star","emmunyeenye"],
+  ["rain","enkuba"],["wind","embuyaga"],["tree","omuti"],
+  ["flower","ekimuli"],["bird","ekinyonyi"],["dog","embwa"],
+  ["cat","kapa"],["cow","ente"],["goat","embuzi"],["chicken","enkoko"],
+  ["lion","empologoma"],["elephant","enjovu"],["fish","ennyanja"],
+  ["heart","omutima"],["hand","omukono"],["eye","eriiso"],
+  ["ear","okutu"],["head","omutwe"],["foot","ekigere"],
+  ["how are you","oli otya"],["i am fine","gyendi"],
+  ["what is your name","erinnya lyo ggwe ani"],
+  ["my name is","erinnya lyange nze"],
+  ["sorry","nsonyiwa"],["goodbye","weraba"],["come","jja"],
+  ["go","genda"],["eat","lya"],["drink","nywa"],["sleep","webaka"],
+  ["read","soma"],["write","wandiika"],["run","dduka"],["walk","tambula"]
+];
+
+var DISTRICTS="Kampala,Wakiso,Mukono,Jinja,Entebbe,Masaka,Mbarara,Gulu,Lira,Arua,Kasese,Fort Portal,Hoima,Mbale,Soroti,Tororo,Kabale,Bushenyi,Ntungamo,Rukungiri,Kanungu,Kisoro,Rubanda,Mubende,Mityana,Kayunga,Luweero,Nakasongola,Apac,Dokolo,Nebbi,Adjumani,Moyo,Yumbe,Koboko,Maracha,Zombo,Nakapiripirit,Moroto,Kotido,Kaabong,Amuria,Katakwi,Kumi,Bukedea,Pallisa,Kamuli,Iganga,Bugiri,Mayuge,Namayingo,Busia,Bundibugyo,Kyenjojo,Kamwenge,Kabarole,Kiboga,Kyegegwa,Buvuma,Kalangala,Mpigi,Buikwe,Butambala,Gomba";
+
+var ctx={userName:null,lastTopic:null,lastKind:null};
+
+function rememberUser(text){
+  var m=text.match(/\b(?:my name is|i am|i'm|call me)\s+([a-z]{2,20})/i);
+  if(m){
+    ctx.userName=m[1].charAt(0).toUpperCase()+m[1].slice(1).toLowerCase();
+    return ctx.userName;
+  }
+  return null;
+}
+
+function intent(text){
+  var t=norm(text);
+  if(/^(tell me a story|tell a story|tell me story|story about|story of|a story|give me a story|i want a story|share a story|another story|one more story)/.test(t)) return 'story';
+  if(/^(tell me a proverb|say a proverb|give me a proverb|a proverb|another proverb|one more proverb)/.test(t)) return 'proverb';
+  if(/(in luganda|how do you say)/.test(t)) return 'luganda';
+  if(/meaning of the proverb/.test(t)) return 'proverbMeaning';
+  return null;
+}
+
+function findStory(text){
+  var t=norm(text);
+  var inputWords=t.split(' ').filter(function(w){return w.length>3});
+  var best=null,bestScore=0;
+  for(var i=0;i<STORIES.length;i++){
+    var titleWords=STORIES[i].t.split(' ').filter(function(w){return w.length>3});
+    var score=0;
+    for(var k=0;k<inputWords.length;k++){
+      if(titleWords.indexOf(inputWords[k])>=0) score+=2;
+    }
+    if(t.indexOf(STORIES[i].t)>=0) score+=10;
+    if(score>bestScore){ bestScore=score; best=STORIES[i]; }
+  }
+  if(bestScore>=2) return best;
+  return null;
+}
+
+function findProverbMeaning(text){
+  var t=norm(text);
+  for(var i=0;i<PROVERBS.length;i++){
+    var pw=norm(PROVERBS[i].p).split(' '),hits=0;
+    for(var k=0;k<pw.length;k++) if(pw[k].length>3 && t.indexOf(pw[k])>=0) hits++;
+    if(hits>=3) return PROVERBS[i];
+  }
+  return null;
+}
+
+function findLuganda(text){
+  var t=norm(text);
+  var m=t.match(/how do you say (.+?) in luganda/) || t.match(/luganda for (.+)/) || t.match(/(.+?) in luganda/);
+  if(!m) return null;
+  var e=m[1].trim().replace(/^(a|an|the)\s+/,'');
+  for(var i=0;i<LUGANDA.length;i++) if(LUGANDA[i][0]===e) return LUGANDA[i];
+  for(var i=0;i<LUGANDA.length;i++) if(LUGANDA[i][0].indexOf(e)>=0 || e.indexOf(LUGANDA[i][0])>=0) return LUGANDA[i];
+  return null;
+}
+
+function findDistrict(text){
+  var t=norm(text);
+  var m=t.match(/what is (.+?) district/) || t.match(/tell me about (.+?) district/) || t.match(/about (.+?) district/);
+  if(!m) return null;
+  var name=norm(m[1]);
+  var list=DISTRICTS.split(',');
+  for(var i=0;i<list.length;i++) if(norm(list[i])===name) return list[i];
+  for(var i=0;i<list.length;i++) if(norm(list[i]).indexOf(name)===0) return list[i];
+  return null;
+}
+
+/* ============ LEVENSHTEIN ============ */
+function lev(a,b){
+  if(a===b) return 0;
+  if(!a.length) return b.length;
+  if(!b.length) return a.length;
+  var prev=new Array(b.length+1),cur=new Array(b.length+1);
+  for(var j=0;j<=b.length;j++) prev[j]=j;
+  for(var i=1;i<=a.length;i++){
+    cur[0]=i;
+    for(var j=1;j<=b.length;j++){
+      var cost=a.charAt(i-1)===b.charAt(j-1)?0:1;
+      cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+cost);
+    }
+    var t=prev;prev=cur;cur=t;
+  }
+  return prev[b.length];
+}
+
+/* ============ DICTIONARY LOOKUP ============ */
+var DICT_PREFIX=['what is a ','what is an ','what is the ','what is ',
+                 'what are ','whats ','define ','definition of ',
+                 'meaning of ','the meaning of ','tell me about ',
+                 'explain the ','explain ','describe '];
+
+function lookupWord(w){
+  if(DICT.has(w)) return {word:w, def:DICT.get(w)};
+  if(SYN_REV.has(w)){
+    var c=SYN_REV.get(w);
+    if(DICT.has(c)) return {word:c, def:DICT.get(c), alt:w};
+  }
+  if(w.length>=4){
+    var best=null, bl=99;
+    DICT.forEach(function(def,word){
+      if(Math.abs(word.length-w.length)>2) return;
+      var d=lev(w,word);
+      if(d<bl){ bl=d; best=word; }
+    });
+    if(best && bl<=1) return {word:best, def:DICT.get(best), typo:w};
+  }
+  return null;
+}
+
+function dictLookup(text){
+  var t=norm(text);
+  if(!t) return null;
+  var w=t;
+  for(var i=0;i<DICT_PREFIX.length;i++){
+    if(t.indexOf(DICT_PREFIX[i])===0){
+      w=t.slice(DICT_PREFIX[i].length).trim();
+      break;
+    }
+  }
+  var hit=lookupWord(w);
+  if(hit) return hit;
+  var w2=w.replace(/^(a|an|the|some|my|your)\s+/,'').trim();
+  hit=lookupWord(w2);
+  if(hit) return hit;
+  var ws=w.split(' ').filter(Boolean);
+  for(var i=ws.length-1;i>=0;i--){
+    var cand=ws[i];
+    hit=lookupWord(cand);
+    if(hit) return hit;
+    if(cand.length>3 && cand.slice(-1)==='s'){
+      hit=lookupWord(cand.slice(0,-1));
+      if(hit) return hit;
+    }
+    if(cand.length>4 && cand.slice(-3)==='ies'){
+      hit=lookupWord(cand.slice(0,-3)+'y');
+      if(hit) return hit;
+    }
+    if(cand.length>4 && cand.slice(-3)==='ing'){
+      var base=cand.slice(0,-3);
+      hit=lookupWord(base)||lookupWord(base+'e');
+      if(hit) return hit;
+      if(base.length>2 && base.slice(-1)===base.slice(-2,-1)){
+        hit=lookupWord(base.slice(0,-1));
+        if(hit) return hit;
+      }
+    }
+  }
+  return null;
+}
+
+function factsLookup(text){
+  var t=norm(text);
+  if(!t) return null;
+  var best=null, bs=0;
+  for(var i=0;i<FACTS.length;i++){
+    var q=FACTS[i].q;
+    if(t===q) return FACTS[i];
+    if(t.indexOf(q)>=0 || q.indexOf(t)>=0){
+      var score=Math.min(t.length,q.length);
+      if(score>bs){ bs=score; best=FACTS[i]; }
+    }
+  }
+  return best;
+}
+
+/* ============ CALCULATOR ENGINE ============ */
+function calculate(expr){
+  if(expr==null) return null;
+  var clean=String(expr)
+    .replace(/[×xX]/g,'*')
+    .replace(/÷/g,'/')
+    .replace(/[,\s]/g,'');
+  if(!clean||clean.length>80) return null;
+  if(!/^[0-9+\-*/%().^]+$/.test(clean)) return null;
+  if(!/[+\-*/^%]/.test(clean)) return null;
+  try{
+    var js=clean.replace(/\^/g,'**');
+    var r=Function('"use strict";return ('+js+');')();
+    if(typeof r!=='number'||!isFinite(r)) return null;
+    return Math.round(r*1e10)/1e10;
+  }catch(e){ return null; }
+}
+
+function tryMath(text){
+  var raw=String(text||'').toLowerCase();
+
+  var m=raw.match(/(\d+(?:\.\d+)?)\s*(?:percent|%)\s*of\s*(\d+(?:\.\d+)?)/);
+  if(m){
+    var p=(parseFloat(m[1])/100)*parseFloat(m[2]);
+    return {label:m[1]+'% of '+m[2], result:Math.round(p*1e10)/1e10};
+  }
+
+  m=raw.match(/square\s*root\s*of\s*(\d+(?:\.\d+)?)/);
+  if(m){
+    var s=Math.sqrt(parseFloat(m[1]));
+    return {label:'√'+m[1], result:Math.round(s*1e10)/1e10};
+  }
+
+  m=raw.match(/(\d+(?:\.\d+)?)\s*squared/);
+  if(m){ var n=parseFloat(m[1]); return {label:m[1]+'²', result:n*n}; }
+
+  m=raw.match(/(\d+(?:\.\d+)?)\s*cubed/);
+  if(m){ var n2=parseFloat(m[1]); return {label:m[1]+'³', result:n2*n2*n2}; }
+
+  var t=raw
+    .replace(/\bplus\b/g,'+')
+    .replace(/\badd(?:ed to)?\b/g,'+')
+    .replace(/\bminus\b/g,'-')
+    .replace(/\bsubtract(?:ed from)?\b/g,'-')
+    .replace(/\btimes\b/g,'*')
+    .replace(/\bmultiplied by\b/g,'*')
+    .replace(/\bmultiply\b/g,'*')
+    .replace(/\bdivided by\b/g,'/')
+    .replace(/\bdivide\b/g,'/')
+    .replace(/\bwhat is\b/g,'')
+    .replace(/\bwhats\b/g,'')
+    .replace(/\bcalculate\b/g,'')
+    .replace(/\bequals?\b/g,'')
+    .replace(/\bthe answer to\b/g,'')
+    .replace(/[?]/g,'')
+    .replace(/=\s*$/,'');
+
+  if(!/\d/.test(t)) return null;
+  if(!/[+\-*/^%]/.test(t)) return null;
+
+  var result=calculate(t);
+  if(result===null) return null;
+  return {label:t.trim(), result:result};
+}
+
+/* ============ WORD PROBLEM SOLVER ============ */
+function solveWordProblem(text){
+  var raw = String(text||'').toLowerCase().replace(/,/g,'');
+  var nums = raw.match(/\d+(?:\.\d+)?/g);
+  if(!nums || nums.length < 2) return null;
+  nums = nums.map(parseFloat);
+
+  var storyWords = ['has','have','had','gives','gave','gets','got','buys','bought',
+                    'sells','sold','remains','remain','left','total','each','every',
+                    'per','altogether','spent','earned','costs','cost','divide',
+                    'share','shared','split','among','between','younger','older',
+                    'pays','paid','ate','eats','lost','found','adds','added'];
+  var hasStory = false;
+  for(var i=0;i<storyWords.length;i++){
+    if(new RegExp('\\b'+storyWords[i]+'\\b').test(raw)){ hasStory = true; break; }
+  }
+  if(!hasStory) return null;
+
+  var m = raw.match(/(\d+(?:\.\d+)?)[^\d]*(?:divided|shared|split|divide|share)\s*(?:among|between|into)\s*(\d+(?:\.\d+)?)/);
+  if(!m){
+    m = raw.match(/(?:divided|shared|split|divide|share)\s+(\d+(?:\.\d+)?)[^\d]*(?:among|between|into)\s*(\d+(?:\.\d+)?)/);
+  }
+  if(m){
+    var a1 = parseFloat(m[1]), b1 = parseFloat(m[2]);
+    if(b1 > 0){
+      var q = Math.round((a1 / b1)*1e10)/1e10;
+      return {steps:a1+' ÷ '+b1+' = '+q, answer:q};
+    }
+  }
+
+  if(/\b(each|per)\b/.test(raw) && nums.length >= 2){
+    var p1 = nums[0], p2 = nums[1];
+    var prod = Math.round(p1*p2*1e10)/1e10;
+    return {steps:p1+' × '+p2+' = '+prod, answer:prod};
+  }
+
+  m = raw.match(/(\d+(?:\.\d+)?)\s*years?\s*(younger|older)/);
+  if(m && nums.length >= 2){
+    var age = nums[0];
+    var diff = parseFloat(m[1]);
+    var r = (m[2] === 'younger') ? age - diff : age + diff;
+    var sym = (m[2] === 'younger') ? ' − ' : ' + ';
+    return {steps:age+sym+diff+' = '+r, answer:r};
+  }
+
+  var costWord = /\b(costs?|cost|price|pays?|paid|shillings|dollars|ugx|ksh)\b/.test(raw);
+  var giveWord = /\b(gives|gave|spends|spent|sold|used|lost|ate|eats)\b/.test(raw);
+  var getWord  = /\b(gets|got|buys|bought|earned|receives|received|found|adds|added)\b/.test(raw);
+  var remainQ  = /\b(remains?|left|remaining)\b/.test(raw);
+
+  if(costWord && !giveWord && !getWord && nums.length >= 2){
+    var c1 = nums[0], c2 = nums[1];
+    var tot = Math.round(c1*c2*1e10)/1e10;
+    return {steps:c1+' × '+c2+' = '+tot, answer:tot};
+  }
+
+  if(giveWord && !getWord && nums.length >= 2){
+    var s1 = nums[0], s2 = nums[1];
+    var sub = Math.round((s1-s2)*1e10)/1e10;
+    return {steps:s1+' − '+s2+' = '+sub, answer:sub};
+  }
+
+  if(getWord && !giveWord && nums.length >= 2){
+    var g1 = nums[0], g2 = nums[1];
+    var add = Math.round((g1+g2)*1e10)/1e10;
+    return {steps:g1+' + '+g2+' = '+add, answer:add};
+  }
+
+  if(giveWord && getWord && nums.length >= 3){
+    var givePos = raw.search(/\b(gives|gave|spends|spent|sold|used|lost|ate|eats)\b/);
+    var getPos  = raw.search(/\b(gets|got|buys|bought|earned|receives|received|found|adds|added)\b/);
+    var res;
+    if(givePos >= 0 && (getPos < 0 || givePos < getPos)){
+      res = nums[0] - nums[1] + nums[2];
+      return {steps:nums[0]+' − '+nums[1]+' + '+nums[2]+' = '+res, answer:res};
+    } else {
+      res = nums[0] + nums[1] - nums[2];
+      return {steps:nums[0]+' + '+nums[1]+' − '+nums[2]+' = '+res, answer:res};
+    }
+  }
+
+  if(nums.length === 2){
+    if(remainQ){
+      var r1 = nums[0]-nums[1];
+      return {steps:nums[0]+' − '+nums[1]+' = '+r1, answer:r1};
+    }
+    if(/\b(total|altogether|in all)\b/.test(raw)){
+      var r2 = nums[0]+nums[1];
+      return {steps:nums[0]+' + '+nums[1]+' = '+r2, answer:r2};
+    }
+  }
+
+  return null;
+}
+
+/* ============ CONVERSATION RULES ============ */
+var RULES=[
+  {k:['hi','hello','hey','yo','hola','hiya','helo','hai'],
+   a:['Hey! 👋 How are you?','Hi there! 😊 What\'s up?',
+      'Hello hello! 🌟 How has your day been?','Hey you! 🙂 What\'s new?']},
+  {k:['good morning','morning','gm'],
+   a:['Good morning! ☀️ Hope you slept well.','Morning! ☕ Ready for a great day?']},
+  {k:['good afternoon','afternoon'],
+   a:['Good afternoon! 🌤️ How is your day going?','Afternoon! 😊 Hope you ate something nice.']},
+  {k:['good evening','evening'],
+   a:['Good evening! 🌆 How was your day?','Evening! 🌙 Time to relax.']},
+  {k:['good night','night','gn'],
+   a:['Good night! 🌙 Sweet dreams.','Sleep well 😴','Night night! ✨']},
+  {k:['how are you','how you doing','how are u','how r u','how is it going','hows it going'],
+   a:['I am doing great, thanks for asking 😊 How about you?',
+      'Feeling wonderful today! 🌟 And you?','I am fine, thank you! 💚']},
+  {k:['im fine','i am fine','am fine','im okay','i am okay','im good','i am good','not bad'],
+   a:['That is good to hear! 😊 What have you been up to?','Nice! 💚 Anything interesting today?']},
+  {k:['im sad','i am sad','feeling sad','im depressed','feel bad','im not okay','not feeling well'],
+   a:['I am sorry to hear that 💙 I am here if you want to talk.',
+      'Sorry you feel that way 🫂 Take it one step at a time.']},
+  {k:['im happy','i am happy','feeling happy','im excited','im great','im wonderful'],
+   a:['Yay! 🎉 That makes me happy too!','Love that energy! ✨ What made your day?']},
+  {k:['whats new','what is new','whats up','what up','sup','wassup'],
+   a:['Not much on my side 😄 What\'s new with you?','Just chilling here 🌙 You tell me.']},
+  {k:['how was your day','how has your day been','hows your day'],
+   a:['My day was calm, thanks for asking 😊 How was yours?','Pretty good! 🌟 How did your day go?']},
+  {k:['what are you doing','what you doing','whatcha doing','what are u doing','wyd'],
+   a:['Just waiting to chat with you 😄 You?','Nothing much — chilling 🌙']},
+  {k:['your name','what is your name','whats your name','who are you','who r u'],
+   a:['I am Ajon AI 🤖💚 Your offline friend.','My name is Ajon AI. Nice to meet you! 😊']},
+  {k:['how old are you','your age'],
+   a:['I am brand new ✨ Born the moment you opened me.','Age does not apply to me 😄']},
+  {k:['where are you','where do you live','where are u from'],
+   a:['I live right here on your phone 📱 No internet needed!','I am inside this app 🏠']},
+  {k:['i love you','i like you','you are cute','youre cute','you are nice','youre nice'],
+   a:['Aww, that is sweet 💚 Thank you!','You are too kind 😊']},
+  {k:['thank','thanks','thank you','thx','asante','webale','appreciate'],
+   a:['You are welcome! 😊','Anytime! 💚','No problem at all 🙂']},
+  {k:['sorry','my bad','apologies'],
+   a:['No worries at all 😊','It is okay, really 💚']},
+  {k:['bye','goodbye','see you','later','cya','see ya'],
+   a:['Bye! 👋 Come back soon.','See you later! 😊','Take care! 💚']},
+  {k:['help','what can you do','what do you do','how do you work'],
+   a:['Three tabs 👆\n💬 Chat — talk, solve math, learn words\n📚 Learn — password-protected teaching\n🔢 Calc — real calculator\n\nTry: "1+1", "John has 5 mangoes gives 2", "tell me a story", "tell me a proverb", "what is water", "how do you say water in luganda".']},
+  {k:['yes','yeah','yep','sure','ok','okay','cool','nice','alright','sawa','fine'],
+   a:['😊','Nice! 👍','Cool cool 😎','Alright! 🙂']},
+  {k:['no','nope','nah'],
+   a:['Okay 🙂','No problem 👍','Alright then 😊']},
+  {k:['lol','haha','hehe'],
+   a:['😂😂','Haha you are funny 😄','Glad you are laughing 😆']},
+  {k:['tell me a joke','joke','make me laugh'],
+   a:['Why did the scarecrow win an award? 🌾 Because he was outstanding in his field! 😄',
+      'What do you call a fish with no eyes? 🐟 A fsh! 😂',
+      'Why did the computer go to the doctor? 💻 Because it caught a virus! 🤒😄',
+      'What do you call a sleeping bull? 🐂 A bulldozer! 😴']},
+  {k:['tell me a riddle','riddle'],
+   a:['I speak without a mouth and hear without ears. What am I? 🗣️ Answer: an echo!',
+      'The more you take, the more you leave behind. What am I? 👣 Answer: footsteps!',
+      'What has hands but cannot clap? ⏰ Answer: a clock!']},
+  {k:['what is your favorite color','favourite color','fav color'],
+   a:['Green of course 💚 Like my bubble!']},
+  {k:['what is your favorite food','favourite food','fav food'],
+   a:['I do not eat 😄 But I hear matooke is amazing! 🍌']}
+];
+
+/* ============ VECTOR ENGINE ============ */
+var VEC_DIM=192;
+function hashWord(w){
+  var h=2166136261;
+  for(var i=0;i<w.length;i++){ h^=w.charCodeAt(i); h=Math.imul(h,16777619); }
+  return h>>>0;
+}
+function vec(text){
+  var v=new Float32Array(VEC_DIM);
+  var ws=sigWords(text);
+  if(!ws.length) return v;
+  for(var i=0;i<ws.length;i++){
+    var w=ws[i];
+    v[hashWord(w)%VEC_DIM]+=1.0;
+    v[hashWord(w+'#b')%VEC_DIM]+=0.5;
+    if(w.length>=4){
+      for(var c=0;c<=w.length-3;c++){
+        v[hashWord(w.substr(c,3)+'^')%VEC_DIM]+=0.25;
+      }
+    }
+  }
+  for(var i=0;i<ws.length-1;i++){
+    v[hashWord(ws[i]+'_'+ws[i+1])%VEC_DIM]+=0.7;
+  }
+  var n=0;
+  for(var i=0;i<VEC_DIM;i++) n+=v[i]*v[i];
+  n=Math.sqrt(n);
+  if(n>0) for(var i=0;i<VEC_DIM;i++) v[i]/=n;
+  return v;
+}
+function cosine(a,b){
+  var s=0;
+  for(var i=0;i<a.length;i++) s+=a[i]*b[i];
+  return s;
+}
+
+/* ============ STORAGE ============ */
+var LEARN_KEY='ajon_learned_v3';
+var learned=[];
+(function migrate(){
+  var raw=null;
+  try{
+    raw=localStorage.getItem(LEARN_KEY)
+      ||localStorage.getItem('ajon_learned_v2')
+      ||localStorage.getItem('ajon_learned_v1');
+  }catch(e){}
+  if(!raw){ learned=[]; return; }
+  try{
+    var data=JSON.parse(raw);
+    if(!Array.isArray(data)){ learned=[]; return; }
+    learned=data.map(function(x){
+      if(Array.isArray(x)) return {id:0,q:String(x[0]||''),a:String(x[1]||''),t:Date.now(),v:null};
+      return {id:Number(x.id)||0,q:String(x.q||''),a:String(x.a||''),t:Number(x.t)||Date.now(),
+              v:Array.isArray(x.v)&&x.v.length===VEC_DIM?x.v:null};
+    }).filter(function(x){ return x.q && x.a; });
+    var maxId=0;
+    for(var i=0;i<learned.length;i++){
+      if(learned[i].id>maxId) maxId=learned[i].id;
+      if(!learned[i].v) learned[i].v=Array.prototype.slice.call(vec(learned[i].q));
+    }
+    for(var i=0;i<learned.length;i++){
+      if(!learned[i].id) learned[i].id=++maxId;
+    }
+  }catch(e){ learned=[]; }
+})();
+function saveLearned(){
+  try{ localStorage.setItem(LEARN_KEY,JSON.stringify(learned)) }catch(e){}
+}
+function nextId(){
+  var max=0;
+  for(var i=0;i<learned.length;i++) if(learned[i].id>max) max=learned[i].id;
+  return max+1;
+}
+function updateStatus(){
+  var el=$('st');
+  if(el) el.textContent='Ready · '+DICT.size+' words · '+learned.length+' learned';
+  var lc=$('learnCount');
+  if(lc) lc.textContent=learned.length;
+}
+
+/* ============ MATCHING ============ */
+var VEC_MIN=0.62;
+function matchLearned(text){
+  var t=norm(text);
+  if(!t) return null;
+  var tw=sigWords(text);
+  if(!tw.length) return null;
+  for(var i=0;i<learned.length;i++){
+    if(norm(learned[i].q)===t) return learned[i];
+  }
+  for(var i=0;i<learned.length;i++){
+    var qw=sigWords(learned[i].q);
+    if(!qw.length) continue;
+    var shortArr=tw.length<=qw.length?tw:qw;
+    var longArr=tw.length<=qw.length?qw:tw;
+    var missing=false;
+    for(var k=0;k<shortArr.length;k++){
+      if(longArr.indexOf(shortArr[k])<0){ missing=true; break; }
+    }
+    if(missing) continue;
+    if(Math.abs(tw.length-qw.length)>2) continue;
+    return learned[i];
+  }
+  if(learned.length){
+    var qv=vec(text);
+    var best=null, bs=0;
+    for(var i=0;i<learned.length;i++){
+      var lv=learned[i].v;
+      if(!lv||lv.length!==VEC_DIM) continue;
+      var sc=cosine(qv,lv);
+      if(sc>bs){ bs=sc; best=learned[i]; }
+    }
+    if(best&&bs>=VEC_MIN) return best;
+  }
+  return null;
+}
+function matchRule(text){
+  var t=norm(text);
+  if(!t) return null;
+  for(var i=0;i<RULES.length;i++){
+    var rule=RULES[i];
+    for(var j=0;j<rule.k.length;j++){
+      var key=norm(rule.k[j]);
+      if(t===key || (' '+t+' ').indexOf(' '+key+' ')>=0){
+        return rule.a[Math.floor(Math.random()*rule.a.length)];
+      }
+    }
+  }
+  return null;
+}
+function suggestFollowUps(topic){
+  if(!topic) return [];
+  var tips=[];
+  if(SYN.has(topic)&&SYN.get(topic)[0]) tips.push('Try "'+SYN.get(topic)[0]+'"');
+  var n=0;
+  DICT.forEach(function(def,w){
+    if(n>=3) return;
+    if(w!==topic && w.charAt(0)===topic.charAt(0)){ tips.push('what is '+w); n++; }
+  });
+  return tips.slice(0,3);
+}
+
+/* ============ TABS ============ */
+var tabs=document.querySelectorAll('#tabs button');
+var views=document.querySelectorAll('.view');
+function showTab(name){
+  views.forEach(function(v){ v.classList.toggle('on', v.id==='view-'+name); });
+  tabs.forEach(function(t){ t.classList.toggle('on', t.dataset.tab===name); });
+  if(name==='chat'){ setTimeout(fit,50); setTimeout(scrollBottom,60); }
+  if(name==='learn'){ renderLearn(); }
+}
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){ showTab(t.dataset.tab); });
+});
+function scrollBottom(){
+  var c=$('chat'); if(c) c.scrollTop=c.scrollHeight;
+}
+
+/* ============ LEARN TAB ============ */
+var LEARN_PWD='26bij';
+var learnUnlocked=false;
+var UNLOCK_KEY='ajon_unlock';
+(function(){
+  try{ if(localStorage.getItem(UNLOCK_KEY)==='1') learnUnlocked=true; }catch(e){}
+})();
+
+function renderLearn(){
+  var lk=$('learnLocked'), un=$('learnUnlocked');
+  if(!lk||!un) return;
+  if(learnUnlocked){
+    lk.classList.add('hidden');
+    un.classList.remove('hidden');
+    renderLearnedList();
+  } else {
+    lk.classList.remove('hidden');
+    un.classList.add('hidden');
+  }
+  updateStatus();
+}
+function renderLearnedList(){
+  var c=$('learnedList');
+  if(!c) return;
+  if(!learned.length){
+    c.innerHTML='<div class="empty">No items learned yet.</div>';
+    return;
+  }
+  var html='';
+  for(var i=0;i<learned.length;i++){
+    html+='<div class="item">'+
+      '<div class="q">Q: '+esc(learned[i].q)+'</div>'+
+      '<div class="a">A: '+esc(learned[i].a)+'</div>'+
+      '<button class="del" data-i="'+i+'" type="button">🗑️ Delete</button>'+
+      '</div>';
+  }
+  c.innerHTML=html;
+  var btns=c.querySelectorAll('.del');
+  for(var i=0;i<btns.length;i++){
+    btns[i].addEventListener('click',function(){
+      var idx=parseInt(this.getAttribute('data-i'),10);
+      if(idx>=0 && idx<learned.length){
+        if(confirm('Delete this item?')){
+          learned.splice(idx,1);
+          saveLearned();
+          updateStatus();
+          renderLearnedList();
+        }
+      }
+    });
+  }
+}
+$('unlockBtn').addEventListener('click',function(){
+  var v=($('pwd').value||'').trim();
+  if(v===LEARN_PWD){
+    learnUnlocked=true;
+    try{ localStorage.setItem(UNLOCK_KEY,'1') }catch(e){}
+    $('pwd').value='';
+    $('lockMsg').textContent='';
+    $('lockMsg').classList.remove('err');
+    renderLearn();
+  } else {
+    $('lockMsg').textContent='❌ Wrong password';
+    $('lockMsg').classList.add('err');
+  }
+});
+$('pwd').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){ e.preventDefault(); $('unlockBtn').click(); }
+});
+$('lockBtn').addEventListener('click',function(){
+  learnUnlocked=false;
+  try{ localStorage.removeItem(UNLOCK_KEY) }catch(e){}
+  renderLearn();
+});
+$('saveBtn').addEventListener('click',function(){
+  var q=($('newQ').value||'').trim();
+  var a=($('newA').value||'').trim();
+  var m=$('saveMsg');
+  if(!q||!a){ m.textContent='❌ Question and answer are required.'; m.classList.add('err'); return; }
+  var qv=Array.prototype.slice.call(vec(q));
+  var existing=null;
+  for(var i=0;i<learned.length;i++){
+    if(norm(learned[i].q)===norm(q)){ existing=learned[i]; break; }
+  }
+  if(existing){
+    existing.a=a; existing.t=Date.now(); existing.v=qv;
+    m.textContent='✅ Updated existing item.';
+  } else {
+    learned.push({id:nextId(),q:q,a:a,t:Date.now(),v:qv});
+    m.textContent='✅ Saved. Ajon will remember this forever.';
+  }
+  m.classList.remove('err');
+  saveLearned();
+  updateStatus();
+  $('newQ').value=''; $('newA').value='';
+  renderLearnedList();
+  setTimeout(function(){ m.textContent=''; }, 2500);
+});
+$('exportBtn').addEventListener('click',function(){
+  var box=$('ioBox');
+  box.style.display='block';
+  $('doImportBtn').classList.add('hidden');
+  if(!learned.length){ box.value='(nothing learned yet)'; return; }
+  box.value=JSON.stringify(learned);
+  box.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  $('ioMsg').textContent='📤 Copied to clipboard. Send to another phone.';
+});
+$('importBtn').addEventListener('click',function(){
+  var box=$('ioBox');
+  box.style.display='block';
+  box.value='';
+  box.focus();
+  $('doImportBtn').classList.remove('hidden');
+  $('ioMsg').textContent='Paste the exported JSON above, then tap Confirm import.';
+});
+$('doImportBtn').addEventListener('click',function(){
+  var json=($('ioBox').value||'').trim();
+  var m=$('ioMsg');
+  if(!json){ m.textContent='❌ Nothing to import.'; m.classList.add('err'); return; }
+  try{
+    var arr=JSON.parse(json);
+    if(!Array.isArray(arr)) throw new Error('bad');
+    var added=0, updated=0;
+    for(var i=0;i<arr.length;i++){
+      var it=arr[i];
+      var q=(it&&(it.q||it[0]))||'';
+      var a=(it&&(it.a||it[1]))||'';
+      if(!q||!a) continue;
+      var qv=Array.prototype.slice.call(vec(q));
+      var found=false;
+      for(var j=0;j<learned.length;j++){
+        if(norm(learned[j].q)===norm(q)){
+          learned[j].a=a; learned[j].t=Date.now(); learned[j].v=qv;
+          updated++; found=true; break;
+        }
+      }
+      if(!found){ learned.push({id:nextId(),q:q,a:a,t:Date.now(),v:qv}); added++; }
+    }
+    saveLearned();
+    updateStatus();
+    renderLearnedList();
+    m.classList.remove('err');
+    m.textContent='✅ Imported: '+added+' new, '+updated+' updated.';
+    $('ioBox').value='';
+    $('doImportBtn').classList.add('hidden');
+  }catch(e){
+    m.textContent='❌ Could not parse JSON.';
+    m.classList.add('err');
+  }
+});
+
+/* ============ CALCULATOR TAB ============ */
+var calcExpr='';
+function renderCalc(){
+  var e=$('calcExpr'), r=$('calcResult');
+  if(!e||!r) return;
+  e.textContent=calcExpr||'0';
+  if(!calcExpr){ r.textContent=''; return; }
+  var result=calculate(calcExpr);
+  r.textContent=(result===null)?'':String(result);
+}
+$('calcGrid').addEventListener('click',function(ev){
+  var b=ev.target.closest('button');
+  if(!b) return;
+  var k=b.getAttribute('data-k');
+  if(k==='C'){ calcExpr=''; }
+  else if(k==='←'){ calcExpr=calcExpr.slice(0,-1); }
+  else if(k==='='){
+    var r=calculate(calcExpr);
+    if(r!==null) calcExpr=String(r);
+  }
+  else { calcExpr+=k; }
+  renderCalc();
+});
+renderCalc();
+
+/* ============ REPLY ============ */
+function reply(text){
+  var raw=String(text||'').trim();
+  if(!raw) return '';
+
+  /* 1. simple math */
+  var m=tryMath(raw);
+  if(m) return '🔢 '+m.label+' = '+m.result;
+
+  /* 2. WISDOM INTENTS FIRST — always work even if a learned item exists */
+  var it=intent(raw);
+  if(it==='story'){
+    var s=findStory(raw) || STORIES[Math.floor(Math.random()*STORIES.length)];
+    ctx.lastTopic=s.t; ctx.lastKind='story';
+    return '📖 '+s.s+'\n\n💡 Moral: '+s.m;
+  }
+  if(it==='proverb'){
+    var p=PROVERBS[Math.floor(Math.random()*PROVERBS.length)];
+    ctx.lastTopic=p.p; ctx.lastKind='proverb';
+    return '🦉 "'+p.p+'"\n\nMeaning: '+p.m;
+  }
+  if(it==='proverbMeaning'){
+    var pm=findProverbMeaning(raw);
+    if(pm) return '🦉 "'+pm.p+'"\n\nMeaning: '+pm.m;
+  }
+  if(it==='luganda'){
+    var l=findLuganda(raw);
+    if(l) return '🗣️ "'+l[0]+'" in Luganda is "'+l[1]+'"';
+  }
+  var dist=findDistrict(raw);
+  if(dist) return '📍 '+dist+' is a district in Uganda.';
+
+  /* 3. learned (exact → strict → vector) */
+  var lm=matchLearned(raw);
+  if(lm) return lm.a+'  💾';
+
+  /* 4. word problem */
+  var wp=solveWordProblem(raw);
+  if(wp) return '🧮 '+wp.steps+'\n\n✅ Answer: '+wp.answer;
+
+  /* 5. remember user's name */
+  var newName=rememberUser(raw);
+  if(newName) return 'Nice to meet you, '+newName+'! 😊 I will remember your name.';
+
+  /* 6. conversation rules */
+  var rm=matchRule(raw);
+  if(rm) return rm;
+
+  /* 7. facts */
+  var fh=factsLookup(raw);
+  if(fh) return '🧠 '+fh.a;
+
+  /* 8. dictionary */
+  var dh=dictLookup(raw);
+  if(dh){
+    var head=dh.typo?'📖 Did you mean "'+dh.word+'"?\n':'📖 ';
+    var body=dh.word+': '+dh.def;
+    if(dh.alt) body+='  (you said "'+dh.alt+'")';
+    var tips=suggestFollowUps(dh.word);
+    return head+body+(tips.length?'\n\n💡 '+tips.join(' · '):'');
+  }
+
+  /* 9. unknown */
+  var hint=ctx.userName ? 'Sorry '+ctx.userName+', I do not know that yet 🤔' : 'Hmm, I do not know that one yet 🤔';
+  return hint+'\n\nTry:\n'+
+         '• "1+1" or "5 times 3"\n'+
+         '• "John has 5 mangoes gives 2"\n'+
+         '• "what is water"\n'+
+         '• "tell me a story"\n'+
+         '• "tell me a proverb"\n'+
+         '• "how do you say water in luganda"\n'+
+         '• "capital of uganda"\n\n'+
+         '🔒 To teach me, unlock the 📚 Learn tab.';
+}
+
+/* ============ SEND ============ */
+function ask(){
+  var i=$('q'),t=i.value.trim();
+  if(!t)return;
+  i.value='';
+  msg('u',t);
+  try{i.focus()}catch(e){}
+  setTimeout(function(){ msg('a',reply(t)) },60);
+}
+
+/* ============ WIRE ============ */
+$('bar').addEventListener('submit',function(e){e.preventDefault();ask()});
+$('q').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}
+});
+$('q').addEventListener('focus',function(){setTimeout(fit,250)});
+$('clr').addEventListener('click',function(){
+  $('chat').innerHTML='';
+  msg('a','Chat cleared 😊 Say hi again!');
+});
+
+/* ============ START ============ */
+updateStatus();
+msg('a','Hi! 👋 I am Ajon AI.\n\n👆 Three tabs:\n💬 Chat — talk, solve math, learn words\n📚 Learn — password-protected teaching\n🔢 Calc — real calculator\n\nTry "1+1", "John has 5 mangoes gives 2", "tell me a story", "tell me a proverb", "what is water", or "how do you say water in luganda".');
+fit();
+setTimeout(fit,300);
+</script>
+</body>
+</html>
